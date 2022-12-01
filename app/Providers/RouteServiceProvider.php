@@ -36,6 +36,8 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });
+
+        $this->myRouteRule();
     }
 
     /**
@@ -48,5 +50,14 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
+
+        RateLimiter::for('custom_route', function () {
+            return Limit::perMinute(2);
+        });
+    }
+
+    protected function myRouteRule()
+    {
+        Route::pattern('myid', '[0-9]+');
     }
 }

@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\FirstMiddleWare;
+use App\Http\Middleware\RouteMiddleWare;
+use App\Http\Middleware\SecondMiddleWare;
 use Illuminate\Support\Facades\Facade;
 
 return [
@@ -209,7 +212,9 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
-        // 'ExampleClass' => App\Example\ExampleClass::class,
+        'myroute' => RouteMiddleWare::class,
+        'first' => FirstMiddleWare::class,
+        'second' => SecondMiddleWare::class,
     ])->toArray(),
 
 ];

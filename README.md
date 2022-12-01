@@ -1,66 +1,321 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# About Routes
+- **All Laravel routes are defined in your route files, which are located in the routes directory.**
+- **These files are automatically loaded by your application's App\Providers\RouteServiceProvider.**
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Available Router Methods
+Route::get($uri, $callback);
+Route::post($uri, $callback);
+Route::put($uri, $callback);
+Route::patch($uri, $callback);
+Route::delete($uri, $callback);
+Route::options($uri, $callback);
 
-## About Laravel
+## Return Value | Basic Routing
+# url => http://127.0.0.1:8000/greeting => hello world
+Route::get('/greeting', function () {
+    return 'hello world';
+});
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Match Route
+# url => http://127.0.0.1:8000/match => get or post
+Route::match(['get', 'post'], '/match', function () {
+    return 'get or post';
+});
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Any Route
+# url => http://127.0.0.1:8000/match => get or post
+Route::any('/any-route', function () {
+    return 'any method can hit';
+});
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Dependency Injection
+# url => http://127.0.0.1:8000/users?name=Muhammad%20Raza%20Bangi
+Route::get('/users', function (Request $request) {
+    dd($request->all()); // ['name' => 'Muhammad Raza Bangi']
+});
 
-## Learning Laravel
+## Redirect Routes
+Route::get('/there', function () {
+    return 'there';
+});
+# url => http://127.0.0.1:8000/here if you hit here it will redirect to there route
+// Route::redirect('/here', '/there');
+// Route::redirect('/here', '/there', 301);
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+// Or, you may use the Route::permanentRedirect method to return a 301 status code:
+Route::permanentRedirect('/here', '/there', 301);
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Route Parameters
+# url => http://127.0.0.1:8000/user/2
+Route::get('/user/{id}', function ($id) {
+    return 'User '.$id; // User 2
+});
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## multi parameters
+# url => http://127.0.0.1:8000/posts/2/comments/3
+Route::get('/posts/{post}/comments/{comment}', function ($postId, $commentId) {
+    return 'Post ' . $postId . ' Comment: ' . $commentId; //Post 2 Comment: 3
+});
 
-## Laravel Sponsors
+## Optional Parameters
+// if you hit http://127.0.0.1:8000/fullname/rizwan result will be rizwan
+// if you hit http://127.0.0.1:8000/fullname result will be Muhammad Raza Bangi
+Route::get('/fullname/{name?}', function ($name = 'Muhammad Raza Bangi') {
+    return $name;
+});
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+## Regular Expression Constraints
+// if you hit http://127.0.0.1:8000/bio/raza then result will be "raza"
+// if you hit http://127.0.0.1:8000/bio/456 then result will be 404 because of patterns
+Route::get('/bio/{name}', function ($name) {
+    return $name;
+})->where('name', '[A-Za-z]+');
 
-### Premium Partners
+// if you hit http://127.0.0.1:8000/number/raza then result will be 404
+// if you hit http://127.0.0.1:8000/number/456 then result will be 456 because of patterns
+Route::get('number/{number}', function ($number) {
+    return $number;
+})->where('number', '[0-9]+');
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+// if you hit http://127.0.0.1:8000/info/12/raza then result will be raza-12
+// if you hit http://127.0.0.1:8000/info/raza/12 then result will be 404
+// if you hit http://127.0.0.1:8000/info/raza/raza then result will be 404
+// if you hit http://127.0.0.1:8000/info/12/12 then result will be 404
+Route::get('info/{id}/{name}', function ($id, $name) {
+    return $name . '-' . $id;
+})->where([
+    'id' => '[0-9]+',
+    'name' => '[A-Za-z]+'
+]);
 
-## Contributing
+## Regular expression patterns have helper methods
+// if you hit http://127.0.0.1:8000/getName/raza then result will be raza
+// if you hit http://127.0.0.1:8000/getName/12 then result will be 404
+Route::get('getName/{name}', function ($fullname) {
+    return $fullname;
+})->whereAlpha('name');
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+// if you hit http://127.0.0.1:8000/getNumber/123 then result will be 123
+// if you hit http://127.0.0.1:8000/getNumber/raza then result will be 404
+Route::get('getNumber/{number}', function ($number) {
+    return $number;
+})->whereNumber('number');
 
-## Code of Conduct
+// if you hit http://127.0.0.1:8000/getBio/123/raza then result will be raza | 123
+// if you hit http://127.0.0.1:8000/getBio/123/123 then result will be 404
+// if you hit http://127.0.0.1:8000/getBio/raza/raza then result will be 404
+Route::get('getBio/{number}/{name}', function ($number, $name) {
+    return $name . ' | ' . $number;
+})->whereAlpha('name')->whereNumber('number');
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+// if you hit http://127.0.0.1:8000/getUuid/fca08d6a-9946-48dc-a7da-e50ce8e118d5 then result will be "fca08d6a-9946-48dc-a7da-e50ce8e118d5"
+// if you hit http://127.0.0.1:8000/getUuid/fca08d6a-9946-48dc-a7da then result will be 404
+Route::get('getUuid/{id}', function ($id) {
+    return $id;
+})->whereUuid('id');
 
-## Security Vulnerabilities
+// if you hit http://127.0.0.1:8000/categories/software then result will be "software"
+// if you hit http://127.0.0.1:8000/categories/health then result will be 404
+Route::get('categories/{category}', function ($category) {
+    return $category;
+})->whereIn('category', ['hardware', 'software']);
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Global Constraints
+// If you would like a route parameter to always be constrained by a given regular expression,
+// you may use the pattern method. You should define these patterns in the boot method of your
+// App\Providers\RouteServiceProvider class:
+// public function boot()
+// {
+//     Route::pattern('id', '[0-9]+');
+// }
 
-## License
+// if you hit http://127.0.0.1:8000/id/12 then result will be 12
+// if you hit http://127.0.0.1:8000/id/raza then result will be 404
+// after add pattern on boot method in routeserviceprovider class it will globally set
+Route::get('id/{myid}', function ($myid) {
+    // Only executed if {myid} is numeric...
+    return $myid;
+});
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Encoded Forward Slashes
+// by this you can show multiple slashes values like /search/raza/12/engineer
+// if you hit http://127.0.0.1:8000/search then result will be 404
+// if you hit http://127.0.0.1:8000/search/raza then result will be raza
+// if you hit http://127.0.0.1:8000/search/raza/bangi then result will be raza/bangi
+Route::get('/search/{search}', function ($search) {
+    return $search;
+})->where('search', '.*');
+
+## Named Routes
+// now this url short name is profile
+Route::get('user/profile', function () {
+    return 'my profile';
+})->name('profile');
+
+// if you hit http://127.0.0.1:8000/getProfile then it will redirect to profile named route which is user/profile
+Route::middleware('myroute')->get('getProfile', function () {
+    // dd(route('profile')); => http://127.0.0.1:8000/user/profile
+    // return redirect()->route('profile'); // long way
+    return to_route('profile'); // short way to redirect the profile
+})->name('another-profile');
+
+// you may pass the parameters as the second argument to the route function
+Route::get('user/{id}/comment', function ($id) {
+    return 'my id is: ' . $id . ' and the comment is not available';
+})->name('comment');
+
+// if you hit http://127.0.0.1:8000/getComment then
+// it will redirect to comment named route with parameters which is user/{id}/comment
+Route::get('getComment', function () {
+    return to_route('comment', ['id' => 16]);
+});
+
+// If you pass additional parameters in the array,
+// those key / value pairs will automatically be added to the generated URL's query string:
+Route::get('getComments', function () {
+    return to_route('comment', ['id' => 12, 'name' => 'raza']);
+});
+
+## Inspecting The Current Route
+// If you would like to determine if the current request was routed to a given named route,
+// you may use the named method on a Route instance. For example,
+// you may check the current route name from a route middleware:
+// -> make middleware and check the named route
+// public function handle($request, Closure $next)
+// {
+//     if ($request->route()->named('profile')) {
+//         //
+//     }
+//     return $next($request);
+// }
+
+
+## Route Group
+Route::middleware(['first', 'second'])->group(function () {
+    Route::get('/getname', function () {
+        return 'get your name';
+    });
+    Route::get('/getnumber', function () {
+        return 'get your number';
+    });
+});
+
+## Route Prefixes
+# url => if you hit http://127.0.0.1:8000/admin/profile then the result wil be admin wala profile...
+Route::prefix('admin')->group(function () {
+    Route::get('profile', function () {
+        return 'admin wala profile...';
+    });
+});
+
+## Route Name Prefixes
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('dashboard', function () {
+        return 'admin dasboard..';
+    })->name('dashboard');
+});
+
+## Implicit Binding
+// use App\Models\User;
+
+Route::get('/users/{user}', function (User $user) {
+    return $user->email;
+});
+
+
+// Soft Deleted Models
+// use App\Models\User;
+
+// Route::get('/users/{user}', function (User $user) {
+//     return $user->email;
+// })->withTrashed();
+
+// Customizing The Key
+// use App\Models\Post;
+
+Route::get('/posts/{post:slug}', function (Post $post) {
+    return $post;
+});
+
+## Always get another key instead of id
+// If you would like model binding to always use a database column other than id when retrieving a given model class,
+// you may override the getRouteKeyName method on the Eloquent model:
+// public function getRouteKeyName()
+// {
+//     return 'slug';
+// }
+
+## Custom Keys & Scoping
+// use App\Models\Post;
+// use App\Models\User;
+
+Route::get('/users/{user}/posts/{post:slug}', function (User $user, Post $post) {
+    return $post;
+});
+
+## Custom Keys & Scoping
+// use App\Models\Post;
+// use App\Models\User;
+
+Route::get('/users/{user}/posts/{post:slug}', function (User $user, Post $post) {
+    return $post;
+});
+
+## Scope Binding
+
+// use App\Models\Post;
+// use App\Models\User;
+
+Route::get('/users/{user}/posts/{post}', function (User $user, Post $post) {
+    return $post;
+})->scopeBindings();
+
+// or
+
+Route::scopeBindings()->group(function () {
+    Route::get('/users/{user}/posts/{post}', function (User $user, Post $post) {
+        return $post;
+    });
+});
+
+## Without Scope Binding
+Route::get('/users/{user}/posts/{post:slug}', function (User $user, Post $post) {
+    return $post;
+})->withoutScopedBindings();
+
+## instead of 404 page
+Route::get('/locations/{user}', function (User $user) {
+    return $user;
+})->name('locations.view')
+->missing(function (Request $request) {
+    return Redirect::route('admin.dashboard');
+});
+
+## Defining Rate Limiters
+// protected function configureRateLimiting()
+// {
+//     RateLimiter::for('global', function (Request $request) {
+//         return Limit::perMinute(1000);
+//     });
+// }
+
+// RateLimiter::for('custom_route', function () {
+//     return Limit::perMinute(2);
+// });
+// ===== then
+Route::get('custom_route', function () {
+    return 'raza bangi';
+})->middleware('throttle:custom_route');
+// after this you can only 2 time hit the link per minute
+
+## Accessing The Current Route
+Route::get('show_route', function () {
+    $route = Route::current(); // Illuminate\Routing\Route
+    // dd($route); // show all routes
+    $name = Route::currentRouteName(); // string
+    // dd($name);
+    $action = Route::getCurrentRequest(); // string
+    // dd($action);
+});
+
+
